@@ -51,7 +51,16 @@ wrong.
   the Concurrent Capability Revoke spec and Symmind — halt as a third
   revocation semantics (suspend/resume), trigger attestation as the ABD-04
   legitimacy question, and the observer's log as the assembler-trust
-  problem.
+  problem. Includes a same-day addendum on the halt/resume asymmetry
+  (resume requires strictly more authority than halt).
+- [`docs/gate-checklist.md`](docs/gate-checklist.md) — the step-4 gate
+  checklist (v0.1, 2026-11-06), built out of sequence before steps 2–3:
+  the universal five-step gate procedure, per-action authorization
+  templates for the highest-risk classes first
+  (deployment, external-send, purchase, publication, data-share,
+  destructive, halt, resume, low-risk), evidence-pack rules, the
+  authorizer's checks with gate-fatigue countermeasures, and the
+  halt/resume asymmetry as an enforceable rule.
 
 ## Design principles
 
@@ -87,7 +96,12 @@ and falsified on its own:
 3. Deliberation log — a canonical record format for divergence, challenge,
    dissent, and authorization for one task.
 4. Gate checklist — per-action authorization templates, highest-risk action
-   classes first.
+   classes first. **Done:**
+   [`docs/gate-checklist.md`](docs/gate-checklist.md) (v0.1, 2026-11-06),
+   built out of sequence before steps 2–3 at the principal's direction;
+   its dependencies on those steps are named in §7 of that document, and
+   the gate record format it writes to stays frozen in
+   `docs/thread-format.md` §6.
 5. Reagent library — a small set of declared, time-boxed interventions with
    stated triggers.
 6. Adversarial evaluation — deliberate tests for sycophantic convergence,

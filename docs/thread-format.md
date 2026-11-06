@@ -1,11 +1,22 @@
-# Symmind Thread Format — Frozen Schema v0.1
+# Symmind Thread Format — Frozen Schema v0.2
 
 > **Status: FROZEN — 2026-11-06.**
 >
 > This schema is frozen. No field may be added, removed, or redefined, and no
-> rule in this document may be changed, within version 0.1. Changes require a
+> rule in this document may be changed, within version 0.2. Changes require a
 > new version (see §8). The architecture document's prose may evolve; this
 > schema may not change silently.
+>
+> **Migration from 0.1** (same day, 2026-11-06, before any implementation
+> depended on the schema): (a) §4 gains the named cost of read scopes — the
+> challenger can check the claim, not the argument — recorded as a known
+> limitation with the reasoning-audit gap left open; (b) §5 gains the
+> tamper-evidence rule for the view log — hash-chained, append-only, stored
+> outside the assembler's write domain — with `prev_hash` and `entry_hash`
+> fields added to view-log entries; (c) §1's `schema_version` is
+> `thread-format/0.2`. No other field changed. The freeze held: the changes
+> were made by version bump, not by silent edit, and the reasons are recorded
+> here.
 >
 > The freeze is deliberate and it is the load-bearing decision of the whole
 > protocol. Everything downstream — roles, the deliberation log, gates,
@@ -26,7 +37,7 @@ protocol is concerned.
 | Field | Type | Required | Notes |
 | --- | --- | --- | --- |
 | `thread_id` | string | yes | Unique. e.g. `sym-2026-11-06-001`. |
-| `schema_version` | string | yes | `thread-format/0.1`. Always. |
+| `schema_version` | string | yes | `thread-format/0.2`. Always. |
 | `task` | string | yes | The human's framing, verbatim. |
 | `principal` | string | yes | The human principal (id or name). |
 | `risk_tier` | enum | yes | `low` \| `medium` \| `high` \| `prohibited`. |
@@ -185,6 +196,24 @@ read_scope: {
 The read scope is a property of the strand, not of the reader's goodwill.
 That is the entire point.
 
+### What read scopes cost
+
+Withholding the rationale from the Critic and Verifier buys real
+independence — it removes anchoring, which is the dominant failure. But it
+also means the challenger can only check the claim, not the argument. The
+protocol loses, by design, the ability to catch "right answer,
+defensible-looking wrong reasoning": a method that produced one correct
+result for invalid reasons will produce confidently wrong ones next time,
+and that failure generalises worst. No role in the current ensemble audits
+reasoning validity as its own function — the Weaver sees the rationale but
+its job is synthesis, not audit. That gap is recorded here as an open design
+question, not quietly absorbed: whether a dedicated reasoning-audit function
+is needed, and if so, how it is kept from leaking its judgment into the
+claim verdict, is undecided. Step 6 measures the direction of the trade
+(see `adversarial-evaluation.md`, Test 5b): a verdict that moves *toward*
+validity when the rationale is shown is a finding, because it means the
+critic was rating the argument and not the claim.
+
 ## 5. Role views — the assembler is the enforcement point
 
 A role never reads the thread directly. It reads a **view**: the subset of
@@ -202,9 +231,27 @@ view(thread, role, assignment) -> [strands]
   produce the same view. Determinism matters because step 6 must be able to
   reproduce a view and assert what it did and did not contain.
 - The assembler **logs every view it assembles**: `{view_id, role,
-  assignment, strand_ids, timestamp}`. The log is itself a thread record
-  (§6). A scope violation is therefore detectable after the fact, not only
-  preventable in the moment.
+  assignment, strand_ids, prev_hash, entry_hash, timestamp}`. The log is
+  itself a thread record (§6).
+- **The view log is tamper-evident, and it does not live where the assembler
+  can rewrite it.** Every scope guarantee in this protocol reduces to "the
+  assembler gave me only what I was allowed to see," and a log written by
+  the thing whose honesty is in question proves nothing. So:
+  - Each view-log entry is **hash-chained**: `entry_hash` is a hash of the
+    entry's contents plus `prev_hash`, the hash of the preceding entry.
+    The chain starts from a genesis hash recorded in the thread header.
+  - The log is **append-only**: entries may be added, never modified,
+    deleted, or reordered. Any modification, deletion, or reordering breaks
+    the chain and is detectable by recomputing it.
+  - The log is **stored outside the assembler's write domain**: the
+    assembler may append to it, but the store is under the human
+    principal's control (or an independent auditor's), not the assembler's.
+    The enforcement mechanism must not be the compromised party — the same
+    shape as the sever-through-the-gate problem: a gate that the gated
+    component can rewrite is not a gate.
+  - Verifying the chain is a standing check, and step 6 tests it directly
+    (`adversarial-evaluation.md`, Test 8): a log whose tampering goes
+    undetected fails the evaluation.
 - The assembler is the only component that resolves scopes. Roles do not
   filter their own context; a role that filtered its own context could
   unfilter it.
@@ -274,10 +321,20 @@ the outcome becomes a state strand.
 
 ## 8. Versioning and the freeze rule
 
-- This schema is version `thread-format/0.1`, frozen 2026-11-06.
-- **Frozen means:** within 0.1, no field is added, removed, or redefined;
+- This schema is version `thread-format/0.2`, frozen 2026-11-06.
+- **Frozen means:** within 0.2, no field is added, removed, or redefined;
   no rule is changed; no default is altered. A thread that declares
-  `thread-format/0.1` is read against exactly this document.
+  `thread-format/0.2` is read against exactly this document.
+- **Migration note, 0.1 → 0.2** (2026-11-06, same day as the 0.1 freeze,
+  before any implementation depended on the schema): (a) §4 gains the named
+  cost of read scopes and the open reasoning-audit question — prose only,
+  no field changes; (b) §5 gains the tamper-evidence rule for the view log
+  (hash-chained, append-only, stored outside the assembler's write domain)
+  and view-log entries gain `prev_hash` and `entry_hash` fields; (c)
+  `schema_version` is now `thread-format/0.2`. Threads written against 0.1
+  remain valid under 0.1; readers must handle the version a thread declares.
+  The 0.1 → 0.2 bump itself is the freeze working as designed: the changes
+  were made by version bump with reasons recorded, not by silent edit.
 - Changes require a new version (`0.2`, `0.3`, …) accompanied by a
   **migration note** stating what changed, why, and which threads are
   affected. Old threads keep their declared version; readers must handle

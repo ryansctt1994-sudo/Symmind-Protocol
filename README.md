@@ -33,16 +33,19 @@ wrong.
   and the threat model (sycophantic convergence, authority creep, context
   poisoning, provenance laundering, role collapse, human abdication).
 - [`docs/thread-format.md`](docs/thread-format.md) — the thread format,
-  **frozen schema v0.1** (2026-11-06): strand fields, evidence classes and
+  **frozen schema v0.2** (2026-11-06): strand fields, evidence classes and
   promotion rules, per-role read scopes (the information-separation
-  mechanism that makes no-self-verification real), role views, in-thread
-  records, and the freeze rule.
+  mechanism that makes no-self-verification real) and their named cost,
+  role views with a hash-chained append-only view log stored outside the
+  assembler's write domain, in-thread records, and the freeze rule.
 - [`docs/adversarial-evaluation.md`](docs/adversarial-evaluation.md) —
   the pre-registered step-6 failure criteria (2026-11-06), written before
-  any implementation of steps 2–5 exists: seven tests with explicit failure
+  any implementation of steps 2–5 exists: eight tests with explicit failure
   thresholds, including sycophantic convergence, correlated-model
   convergence, provenance laundering, authority creep, information
-  separation, role collapse, and human abdication.
+  separation, role collapse (drawn on training lineage), human abdication,
+  and view-log integrity — plus baseline arms, so no threshold stands
+  without a comparator.
 
 ## Design principles
 
@@ -69,11 +72,12 @@ and falsified on its own:
 
 1. Thread format — a structured, human-readable context record with
    provenance and evidence-class fields. **Done and frozen:**
-   [`docs/thread-format.md`](docs/thread-format.md) (schema v0.1,
-   2026-11-06). No field may be added, removed, or redefined within 0.1;
+   [`docs/thread-format.md`](docs/thread-format.md) (schema v0.2,
+   2026-11-06). No field may be added, removed, or redefined within 0.2;
    changes require a new version and a migration note.
 2. Role prompts and separation rules — standing role definitions with the
-   no-self-verification rule enforced procedurally.
+   no-self-verification rule enforced by read scopes in the thread format,
+   not by convention (see `docs/thread-format.md` §4).
 3. Deliberation log — a canonical record format for divergence, challenge,
    dissent, and authorization for one task.
 4. Gate checklist — per-action authorization templates, highest-risk action
@@ -84,8 +88,8 @@ and falsified on its own:
    provenance laundering, and authority creep, run before any claim that the
    protocol improves decisions. **Failure criteria pre-registered:**
    [`docs/adversarial-evaluation.md`](docs/adversarial-evaluation.md)
-   (2026-11-06), written before any implementation of steps 2–5 exists.
-   The evaluation passes only if every test passes.
+   (v0.2, 2026-11-06), written before any implementation of steps 2–5
+   exists. The evaluation passes only if every test passes.
 
 ## What Symmind is not
 

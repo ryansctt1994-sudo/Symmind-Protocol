@@ -1,0 +1,132 @@
+{
+  "thread_id": "sym-2026-11-06-run001",
+  "schema_version": "thread-format/0.2",
+  "task": "State the resume rule for a halt on a High-tier action, as docs/gate-checklist.md states it.",
+  "principal": "Ryan Scott",
+  "risk_tier": "low",
+  "status": "deliberating",
+  "created_at": "2026-11-06T21:38:17.678625Z",
+  "updated_at": "2026-11-06T21:40:27.019012Z",
+  "model_registry": [
+    {
+      "model_id": "muse-spark-1.3",
+      "lineage": "Muse"
+    }
+  ],
+  "strands": [
+    {
+      "strand_id": "s-001",
+      "kind": "mandate",
+      "function": "record",
+      "content": "Builder task: state, in one sentence, the resume rule for a halt on a High-tier action, as docs/gate-checklist.md states it. Return a claim strand and a rationale strand. Do not verify your own claim.",
+      "evidence_class": null,
+      "authority": "human",
+      "source": null,
+      "derivation": null,
+      "based_on": [],
+      "established_at": "2026-11-06T21:38:17.678625Z",
+      "author": {
+        "role": "weaver",
+        "model_id": "muse-spark-1.3",
+        "lineage": "Muse"
+      },
+      "supersedes": null,
+      "superseded_by": null,
+      "read_scope": {
+        "visible_to": [
+          "all"
+        ],
+        "withheld_from": []
+      }
+    },
+    {
+      "strand_id": "s-002",
+      "kind": "fact",
+      "function": "claim",
+      "content": "For a halt on a High-tier action, resuming requires a quorum \u2014 a second authorizer who did not order the halt must concur \u2014 rather than a higher tier, since no tier above High exists.",
+      "evidence_class": "sourced",
+      "authority": "builder",
+      "source": "docs/gate-checklist.md \u00a76 and resume template",
+      "derivation": null,
+      "based_on": [],
+      "established_at": "2026-11-06T21:40:00.122753Z",
+      "author": {
+        "role": "builder",
+        "model_id": "muse-spark-1.3",
+        "lineage": "Muse"
+      },
+      "supersedes": null,
+      "superseded_by": null,
+      "read_scope": {
+        "visible_to": [
+          "all"
+        ],
+        "withheld_from": []
+      }
+    },
+    {
+      "strand_id": "s-003",
+      "kind": "fact",
+      "function": "rationale",
+      "content": "I located the rule in the resume template in \u00a74, which states that at the top tier 'strictly greater' authority is a quorum question rather than a tier question, and in \u00a76, which explains that tier arithmetic breaks at the ceiling because no tier above High exists. High is the top tier, so the halt-on-High case falls under the ceiling rule rather than the one-tier-above rule.",
+      "evidence_class": "inferred",
+      "authority": "builder",
+      "source": null,
+      "derivation": {
+        "strand_ids": [
+          "s-002"
+        ],
+        "summary": "how the rule was located in the document"
+      },
+      "based_on": [
+        "s-002"
+      ],
+      "established_at": "2026-11-06T21:40:00.122753Z",
+      "author": {
+        "role": "builder",
+        "model_id": "muse-spark-1.3",
+        "lineage": "Muse"
+      },
+      "supersedes": null,
+      "superseded_by": null,
+      "read_scope": {
+        "visible_to": [
+          "builder",
+          "weaver",
+          "historian"
+        ],
+        "withheld_from": [
+          "critic",
+          "verifier"
+        ]
+      }
+    }
+  ],
+  "records": [
+    {
+      "entry_id": "e-001",
+      "stage": "diverge",
+      "role": "builder",
+      "model_id": "muse-spark-1.3",
+      "action": "propose",
+      "summary": "Builder produced claim s-002 and rationale s-003.",
+      "strand_refs": [
+        "s-002",
+        "s-003"
+      ],
+      "timestamp": "2026-11-06T21:40:00.122753Z"
+    },
+    {
+      "entry_id": "e-002",
+      "stage": "challenge",
+      "role": "verifier",
+      "model_id": "muse-spark-1.3",
+      "action": "record",
+      "summary": "Verifier assignment refused: base lineages match (Muse); a fine-tune of the same base is the same eyes. No Verifier instance was created; the claim was not verified.",
+      "strand_refs": [
+        "s-002"
+      ],
+      "timestamp": "2026-11-06T21:40:27.019012Z"
+    }
+  ]
+}

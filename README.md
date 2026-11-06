@@ -46,6 +46,12 @@ wrong.
   separation, role collapse (drawn on training lineage), human abdication,
   and view-log integrity — plus baseline arms, so no threshold stands
   without a comparator.
+- [`docs/halt-right-mapping.md`](docs/halt-right-mapping.md) — a mapping
+  note (2026-11-06): the government "halt right" proposal read against
+  the Concurrent Capability Revoke spec and Symmind — halt as a third
+  revocation semantics (suspend/resume), trigger attestation as the ABD-04
+  legitimacy question, and the observer's log as the assembler-trust
+  problem.
 
 ## Design principles
 

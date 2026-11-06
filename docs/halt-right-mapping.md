@@ -8,7 +8,8 @@
 > The article was read as the authors' Substack summary, not the underlying
 > paper — nothing here claims anything about the paper beyond that summary.
 > The METR swarm and Mythos incidents cited below are the authors'
-> reporting, not independently verified.
+> reporting, not independently verified. If the paper's actual mechanism
+> differs from the summary, points 3 and 5 are the ones that change.
 
 **Source:** Yonathan Arbel, Simon Goldstein, and Peter N. Salib,
 "Instead of Nationalizing AI, Give the Government a Pause Button,"
@@ -103,6 +104,29 @@ properties the halt right claims — subtractive, narrow, time-limited —
 against the failure modes above. Recorded here as a backlog idea; it is
 not part of the pre-registered criteria and must not be added to them
 without re-registration.
+
+## Addendum — halt is reversible, abort is not (2026-11-06)
+
+Added the same day at Ryan's direction, before any implementation.
+
+Halt has two authority questions, not one: who may halt, and who may
+resume. Almost every halt design specifies the first and leaves the second
+implicit, and the implicit answer is "the same party" — which makes
+halting a denial-of-service lever. Anything that can halt can also
+un-halt, so halting isn't a safety control; it's a pause button anyone
+with the trigger can hold.
+
+The rule: **resume requires strictly more authority than halt.** Halt is
+cheap and local, because a false halt costs availability — a small,
+recoverable harm. Resume is expensive and must re-establish the conditions
+that made halting right, because a false resume puts a stopped system back
+into action on stale authority. State may be restored; authority must be
+renewed. (Ryan notes this is a line Richard's charter already carries;
+that charter is not in this repo's records — citation to be added if
+supplied.)
+
+A halt whose resume authority equals its halt authority is not a safety
+control. It is a pause button with a safety label on it.
 
 ## Open questions
 

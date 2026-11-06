@@ -32,6 +32,17 @@ wrong.
   with risk tiers, the Digital Moral Status Index (framed as a proposal),
   and the threat model (sycophantic convergence, authority creep, context
   poisoning, provenance laundering, role collapse, human abdication).
+- [`docs/thread-format.md`](docs/thread-format.md) — the thread format,
+  **frozen schema v0.1** (2026-11-06): strand fields, evidence classes and
+  promotion rules, per-role read scopes (the information-separation
+  mechanism that makes no-self-verification real), role views, in-thread
+  records, and the freeze rule.
+- [`docs/adversarial-evaluation.md`](docs/adversarial-evaluation.md) —
+  the pre-registered step-6 failure criteria (2026-11-06), written before
+  any implementation of steps 2–5 exists: seven tests with explicit failure
+  thresholds, including sycophantic convergence, correlated-model
+  convergence, provenance laundering, authority creep, information
+  separation, role collapse, and human abdication.
 
 ## Design principles
 
@@ -57,7 +68,10 @@ In dependency order, each step producing an artifact that can be inspected
 and falsified on its own:
 
 1. Thread format — a structured, human-readable context record with
-   provenance and evidence-class fields.
+   provenance and evidence-class fields. **Done and frozen:**
+   [`docs/thread-format.md`](docs/thread-format.md) (schema v0.1,
+   2026-11-06). No field may be added, removed, or redefined within 0.1;
+   changes require a new version and a migration note.
 2. Role prompts and separation rules — standing role definitions with the
    no-self-verification rule enforced procedurally.
 3. Deliberation log — a canonical record format for divergence, challenge,
@@ -68,7 +82,10 @@ and falsified on its own:
    stated triggers.
 6. Adversarial evaluation — deliberate tests for sycophantic convergence,
    provenance laundering, and authority creep, run before any claim that the
-   protocol improves decisions.
+   protocol improves decisions. **Failure criteria pre-registered:**
+   [`docs/adversarial-evaluation.md`](docs/adversarial-evaluation.md)
+   (2026-11-06), written before any implementation of steps 2–5 exists.
+   The evaluation passes only if every test passes.
 
 ## What Symmind is not
 

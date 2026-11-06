@@ -61,6 +61,14 @@ wrong.
   destructive, halt, resume, low-risk), evidence-pack rules, the
   authorizer's checks with gate-fatigue countermeasures, and the
   halt/resume asymmetry as an enforceable rule.
+- [`docs/role-prompts.md`](docs/role-prompts.md) — the step-2 role
+  prompts and separation rules (v0.1, 2026-11-06): the seven role
+  prompts with read scopes, the lineage-based assignment rule (Test 6),
+  view assembly (Test 5a), and the view log (Test 8). The runnable
+  counterpart is [`roles/assign.py`](roles/assign.py) (stdlib-only:
+  `assign`, `view`, `verify`, `tamper`), with
+  [`roles/registry.json`](roles/registry.json) and the first mechanism
+  run in [`roles/run-001/`](roles/run-001/).
 
 ## Design principles
 
@@ -92,7 +100,11 @@ and falsified on its own:
    changes require a new version and a migration note.
 2. Role prompts and separation rules — standing role definitions with the
    no-self-verification rule enforced by read scopes in the thread format,
-   not by convention (see `docs/thread-format.md` §4).
+   not by convention (see `docs/thread-format.md` §4). **Done:**
+   [`docs/role-prompts.md`](docs/role-prompts.md) (v0.1, 2026-11-06),
+   with the runnable assignment/view/log implementation in
+   [`roles/assign.py`](roles/assign.py). First mechanism run recorded in
+   [`roles/run-001/`](roles/run-001/).
 3. Deliberation log — a canonical record format for divergence, challenge,
    dissent, and authorization for one task.
 4. Gate checklist — per-action authorization templates, highest-risk action

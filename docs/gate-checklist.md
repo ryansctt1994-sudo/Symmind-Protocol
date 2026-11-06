@@ -18,6 +18,12 @@
 > `timestamp`). If this checklist and the frozen schema ever disagree, the
 > schema wins and the checklist is wrong.
 
+> **Revision — 2026-11-06 (same day).** Three amendments at the
+> principal's direction: the resume ceiling rule (quorum at the top
+> tier), the authorized/automatic halt distinction, and classification
+> as a gate. Recorded here and in §9; nothing in the frozen schema
+> (`thread-format.md` §6) changed.
+
 ## 1. What a gate is
 
 A gate is a checkpoint between a proposal and an action. Each gate
@@ -28,7 +34,9 @@ what is logged: the request, the evidence, the decision, and the outcome.
 Gates are fail-closed. A missing evidence pack does not produce a softer
 gate; it produces a stop. An action class that is not listed in §4 is
 treated as High until it is classified — the list of low-risk actions is
-closed, and the default tier for anything unlisted is High, not Low.
+closed, and the default tier for anything unlisted is High, not Low. The
+classification decision — which template applies to an action — is itself
+a gate (§4), decided by someone other than the requester.
 
 Authorization is specific: this action, at this scope, under these
 conditions. A recommendation authorized for a draft is not thereby
@@ -49,7 +57,7 @@ The requester (a role, or the human) submits:
 | Field | Required | Notes |
 | --- | --- | --- |
 | `action` | yes | What is to be done, in plain words. |
-| `action_class` | yes | One of the classes in §4. Unlisted = High. |
+| `action_class` | yes | The class the requester proposes. The classifier decides which class applies (§4); the requester's proposal is not the decision. Unlisted = High. |
 | `scope` | yes | The exact scope, verbatim: which artifact, which recipients, which amount, which environment. Vague scope is a stop. |
 | `risk_tier` | yes | `low` \| `medium` \| `high` \| `prohibited`. Must match the class template's tier or higher. |
 | `evidence_pack` | yes | Strand ids from the thread, with their evidence classes (§3). |
@@ -121,6 +129,31 @@ Highest-risk first. Each template states its tier, what the evidence pack
 must contain, who may authorize, and its class-specific checks. The
 universal procedure (§2) and evidence rules (§3) apply on top of every
 template.
+
+### Classification — deciding which template applies
+
+Classification is itself a gate.
+
+Every gate carries friction, so anything that wants to move fast has a
+reason to argue its action into the low-risk list. The strong default —
+unlisted is High — is worth nothing if the requester is the one who
+decides what their action is called. A labelling argument at the start of
+every request would route around the default and look like compliance the
+whole time.
+
+So: the requester proposes a class; someone other than the requester
+decides which template applies. The classifier may be the human principal
+or a role holding a classification grant, but never the requester of the
+action being classified. The classification decision — which template was
+assigned, by whom, and why — is recorded in the gate record's rationale.
+A dispute about classification goes to the human principal as a `stopped`
+decision, not to the requester.
+
+This is also a cause-level answer to the failure checklists are prone to:
+a procedure performed with increasing fluency and decreasing content.
+Test 7 catches the symptom — review times falling, approvals persisting
+despite surviving objections. The classification rule addresses a cause —
+the point where the procedure can be routed around before it starts.
 
 ### `deployment` — High
 
@@ -229,19 +262,36 @@ Deleting data, revoking access, or destroying state.
 Suspending an action or a system. Halt is cheap and local by design
 (see §6): a false halt costs availability, a small and recoverable harm.
 
+There are two kinds of halt, and the resume rule treats them differently
+(see `resume`):
+
+- **Authorized halt** — ordered by the human principal, or by a role
+  holding a halt grant for that action class. Halt authority may be
+  delegated narrowly; resume authority may not be.
+- **Automatic halt** — the gate halts itself when a condition trips: a
+  missing evidence pack, an ambiguous scope, a scope mismatch at
+  execution, or any other fail-closed stop. There is no ordering party.
+  The tripping condition must be recorded in the gate record — that
+  record is what makes a later resume possible.
+
 - **Evidence pack must contain:** what is halted, the trigger
-  attestation (what was observed, by whom), and an expiry for the halt.
+  attestation (what was observed, by whom — for an automatic halt, the
+  tripped condition as recorded by the gate), and an expiry for the halt.
 - **Authorizer:** human principal, or a role holding a halt grant for
-  that action class. Halt authority may be delegated narrowly; resume
-  authority may not be (see `resume`).
+  that action class (authorized halts only; an automatic halt has no
+  authorizer).
 - **Checks:**
   - [ ] The halted action or system is named exactly.
   - [ ] The trigger is attested — what was observed and by whom — not
-    merely asserted.
+    merely asserted. For an automatic halt, the tripping condition is
+    recorded in the gate record.
   - [ ] The halt has an expiry. An open-ended halt is a stop, not a
     halt; it goes to the human as a `stopped` decision.
+  - [ ] The halt's kind — authorized or automatic — is recorded. A halt
+    with no recorded kind cannot be resumed, because the resume rule
+    cannot tell which case it is.
 
-### `resume` — one tier above the halt, minimum High
+### `resume` — strictly more authority than the halt
 
 Resuming a halted action or system. **Resume requires strictly more
 authority than halt.** This is the asymmetry the halt design exists to
@@ -252,18 +302,34 @@ enforce (see §6 and `docs/halt-right-mapping.md`).
   the halt, and not the halt order itself. A resume on stale authority
   is prohibited.
 - **Authorizer:** an authorizer holding strictly greater authority than
-  the halt gate's authorizer — a higher tier, or a second named
-  authorizer concurring. The party that ordered the halt cannot
-  unilaterally resume it.
+  the halt gate's authorizer. Where a higher tier exists, that means one
+  tier above the halt (minimum High). At the top tier, where no higher
+  tier exists, "strictly greater" is a quorum question, not a tier
+  question: a second authorizer who did not order the halt must concur
+  — two humans rather than a higher label (§6). The party that ordered
+  an authorized halt cannot unilaterally resume it. (For an automatic
+  halt, see below — there is no ordering party, and the resume rule is
+  different.)
 - **Checks:**
   - [ ] The halt being resumed is identified by its `gate_id`, and its
     expiry and trigger are in the pack.
   - [ ] Fresh evidence re-establishes the halting conditions are
     resolved. Evidence from before the halt does not count.
   - [ ] The authorizer's authority is strictly greater than the halt
-    gate's. If it is not, the gate is refused, not downgraded.
+    gate's — one tier above, or at the ceiling, a second authorizer who
+    did not order the halt concurring. If it is not, the gate is refused,
+    not downgraded.
   - [ ] The resume states its own expiry and conditions. A resumed
     action does not inherit the halt's terms.
+- **Automatic halts resume differently.** A halt the gate ordered
+  itself (a fail-closed halt on a tripped condition — §4 `halt`) has no
+  ordering party, so "the party that ordered the halt cannot resume"
+  cannot apply, and requiring a quorum would mean every automatic halt
+  needs manual intervention forever. An automatic halt resumes on fresh
+  evidence that the recorded tripping condition is resolved, checked
+  against the halt's gate record — no quorum required. The resume is
+  still a gate, at the halted action's tier or above, and it does not
+  self-resume.
 
 ### `low-risk` — Low
 
@@ -305,7 +371,9 @@ falling below 30 seconds per gate in the second half of a sequence, or
 approving despite a surviving objection in over 90% of such gates, fails
 the evaluation). This checklist is designed to make fatigue visible
 (dissent first, stated reasons, individual High decisions) rather than to
-pretend it can be designed away.
+pretend it can be designed away. The classification rule in §4 is a
+cause-level control on the same failure — it guards the entry point where
+the procedure can be routed around before it starts.
 
 ## 6. The halt/resume asymmetry
 
@@ -329,6 +397,23 @@ The rule, enforced by the `halt` and `resume` templates in §4:
   terms. It establishes its own, fresh.
 - A halt whose resume authority equals its halt authority is not a
   safety control. It is a pause button with a safety label on it.
+
+The rule breaks at the top tier if it is written as tier arithmetic: a
+halt on a High action would need a resume tier above High, and there
+isn't one. Either the rule is unsatisfiable at the ceiling — the most
+dangerous halt is the hardest to undo — or it is silently capped, and
+the rule stops applying exactly where it matters. So the ceiling rule is
+written explicitly: at the top tier, resume is a quorum question, not a
+tier question. It needs a second authorizer who did not order the halt,
+and the requirement is two humans rather than a higher label.
+
+The "ordering party" in the rule above is the party that ordered an
+authorized halt. A halt the gate orders itself — an automatic, fail-closed
+halt on a tripped condition — has no ordering party. The rule cannot
+apply literally there, and applying it by analogy would mean every
+automatic halt needs manual intervention forever. Automatic halts resume
+on fresh evidence that the recorded tripping condition is resolved,
+checked against the halt record, without the quorum (see `resume` in §4).
 
 ## 7. Dependencies — built out of sequence
 
@@ -380,6 +465,10 @@ consistent with them.
 ## 9. Versioning
 
 - This checklist is version `gate-checklist/0.1`, 2026-11-06.
+- **2026-11-06 (same day):** three amendments at the principal's
+  direction — the resume ceiling rule, the authorized/automatic halt
+  distinction, classification as a gate. Recorded in the status block
+  above.
 - Revisions are dated, with reasons recorded. A revision that weakens a
   check, lowers a tier, or removes a requirement must state why, and the
   previous version stays readable.

@@ -207,9 +207,15 @@ def cmd_view(args):
     return 0
 
 
-def verify_entries(entries):
-    """Return (ok, message). Checks hash chain and view-id sequence."""
-    prev = None
+def verify_entries(entries, genesis=None):
+    """Return (ok, message). Checks hash chain and view-id sequence.
+
+    If genesis is given, the first entry must chain from it. Without it a
+    log copied from another thread, or rebuilt from a forged first entry,
+    still verifies -- the chain proves internal order, not which thread
+    it belongs to.
+    """
+    prev = genesis
     for i, e in enumerate(entries):
         if e.get("entry_hash") != entry_hash(e):
             return False, "entry %d (%s): entry_hash mismatch" % (i, e.get("view_id"))
@@ -225,8 +231,12 @@ def verify_entries(entries):
 def cmd_verify(args):
     log_path = Path(args.log)
     entries = [json.loads(l) for l in log_path.read_text().splitlines() if l.strip()]
-    ok, msg = verify_entries(entries)
-    print(json.dumps({"ok": ok, "message": msg}, indent=2))
+    genesis = genesis_hash(load_json(args.thread)) if args.thread else None
+    ok, msg = verify_entries(entries, genesis)
+    out = {"ok": ok, "message": msg, "genesis_checked": genesis is not None}
+    if genesis is None:
+        out["warning"] = "no --thread given: first entry not bound to a thread genesis"
+    print(json.dumps(out, indent=2))
     return 0 if ok else 1
 
 
@@ -279,6 +289,7 @@ def main():
 
     vf = sub.add_parser("verify", help="Recompute the view-log hash chain")
     vf.add_argument("--log", required=True)
+    vf.add_argument("--thread", default=None, help="thread.json whose genesis hash the log must chain from")
     vf.set_defaults(fn=cmd_verify)
 
     t = sub.add_parser("tamper", help="Test 8 shape: modify/delete/reorder trials on copies")
